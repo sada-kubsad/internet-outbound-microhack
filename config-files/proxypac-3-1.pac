@@ -5,8 +5,7 @@ function FindProxyForURL(url, host)
     var direct = "DIRECT";
     var proxyServer = "PROXY 10.57.2.4:3128";
 
-    if(shExpMatch(host, "ipinfo.io")
-        || shExpMatch(host, "*.ripe.net"))
+    if(shExpMatch(host, "ipinfo.io"))
     {
         return direct;
     }
