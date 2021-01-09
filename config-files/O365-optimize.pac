@@ -3,7 +3,7 @@
 function FindProxyForURL(url, host)
 {
     var direct = "DIRECT";
-    var proxyServer = "PROXY 10.57.2.4:3127";
+    var proxyServer = "PROXY 10.57.2.4:3126";
 
     if(shExpMatch(host, "ipinfo.io")
     ||     shExpMatch(host, "outlook.office.com")
