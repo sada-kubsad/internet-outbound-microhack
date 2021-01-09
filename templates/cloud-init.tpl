@@ -47,7 +47,7 @@ runcmd:
   - mkdir /etc/squid/ssl_certs
   - chown squid:squid /etc/squid/ssl_certs
   - chmod 700 /etc/squid/ssl_certs
-  - curl https://raw.githubusercontent.com/fguerri/internet-outbound-microhack/main/config-files/myCA.pem --output /etc/squid/ssl_certs/myCA.pem
+  - openssl req -new -newkey rsa:2048 -sha256 -days 365 -nodes -x509 -extensions v3_ca -subj "/C=IT/CN=Contoso Enterprise CA" -keyout /etc/squid/ssl_certs/contosoCA.pem  -out /etc/squid/ssl_certs/contosoCA.pem
   - setenforce 0
   - mkdir -p /var/lib/squid
   - rm -rf /var/lib/squid/ssl_db
