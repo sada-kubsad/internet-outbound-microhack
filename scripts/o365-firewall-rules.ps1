@@ -6,8 +6,12 @@ $allowPriority = 1159
 
 $wvdSessionHostPoolSubnet = "10.59.1.0/24"
 
+Write-Host "Retrieving O365 endpointd from web service..."
+
 $endpoints = invoke-restmethod -Uri ("https://endpoints.office.com/endpoints/WorldWide?NoIPv6=true&clientrequestid=" + ([GUID]::NewGuid()).Guid) 
 $endpoints = $endpoints | ? {$_.category -eq "Optimize" -or $_.category -eq "Allow"}
+
+Write-Host "Done!"
 
 $optimizeNetworkRules = @()
 $allowNetworkRules = @()
@@ -17,6 +21,8 @@ $allowApplicationRules = @()
 
 foreach ($endpoint in $endpoints) {
     if (-not ($endpoint.urls -eq $null)) {
+        
+        Write-Host "Creating application rule for $endpoint.serviceAreaDisplayName..."
         
         $uniqueName = $endpoint.id.ToString() + "_O365_" + $endpoint.category + "_" + $endpoint.serviceAreaDisplayName.Replace(" ", "_")
         
@@ -32,6 +38,7 @@ foreach ($endpoint in $endpoints) {
     }
     
     if (-not($endpoint.ips -eq $null)) {
+        Write-Host "Creating network rule for $endpoint.serviceAreaDisplayName..."
         $ips = $endpoint | select -Unique -ExpandProperty ips
         $ports = @()
         $protocols = @()
@@ -61,14 +68,18 @@ foreach ($endpoint in $endpoints) {
     }
 }
 
+Write-Host "Creating firewall config..."
+
 $optimizeApplicationRuleCollection = New-AzFirewallApplicationRuleCollection -Name O365-Optimize -Priority $optimizePriority -ActionType Allow -Rule $optimizeApplicationRules
 $allowApplicationRuleCollection = New-AzFirewallApplicationRuleCollection -Name O365-Allow -Priority $allowPriority -ActionType Allow -Rule $allowApplicationRules
 $optimizeNetworkRuleCollection = New-AzFirewallNetworkRuleCollection -Name O365-Optimize -Priority $optimizePriority -ActionType Allow -Rule $optimizeNetworkRules
 $allowNetworkRuleCollection = New-AzFirewallNetworkRuleCollection -Name O365-Allow -Priority $allowPriority -ActionType Allow -Rule $allowNetworkRules
 
+Write-Host "Setting firewall config..."
 $azfw = Get-AzFirewall -Name $azfwName -ResourceGroupName $rg
 $azfw.ApplicationRuleCollections.Add($optimizeApplicationRuleCollection)
 $azfw.ApplicationRuleCollections.Add($allowApplicationRuleCollection)
 $azfw.NetworkRuleCollections.Add($optimizeNetworkRuleCollection)
 $azfw.NetworkRuleCollections.Add($allowNetworkRuleCollection)
 Set-AzFirewall -AzureFirewall $azfw
+Write-Host "Done!"
