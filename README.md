@@ -3,7 +3,7 @@
 ### [Scenario](#Scenario)
 ### [Prerequistes](#Prerequisites)
 
-### [Challenge 1: Forced tunneling](#Challenge 1: Forced tunneling)
+### [Challenge 1: Forced tunneling]('#Challenge 1: Forced tunneling')
 
 ### [Challenge 2: Route internet traffic through Azure Firewall](#Challenge 2: Route internet traffic through Azure Firewall)
 
