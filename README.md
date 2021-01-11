@@ -258,8 +258,13 @@ To implement this policy, you are going to need:
 
 Contoso's on-prem proxy already allows access to "Default" endpoints because it is currently used to consume those endpoints from the corpotate network. 
 
-An [Office 365 IP Address and URL web service](https://docs.microsoft.com/en-us/microsoft-365/enterprise/microsoft-365-ip-web-service?view=o365-worldwide) allows downloading an up-to-date list of all endpoints (URLs, IP addresses, category, ect). Therefore, both the proxy PAC file and the firewall rules can be automatically generated (and refreshed on a regular basis). In the MicroHack environment, the PAC file has been already generated and can be downloaded from http://10.57.2.4:8080/O365-optmize.pac. You are going to generate the Azure Firewall rules using the same approach:
+An [Office 365 IP Address and URL web service](https://docs.microsoft.com/en-us/microsoft-365/enterprise/microsoft-365-ip-web-service?view=o365-worldwide) allows downloading an up-to-date list of all endpoints (URLs, IP addresses, category, ect). Therefore, both the proxy PAC file and the firewall rules can be automatically generated (and refreshed on a regular basis). In the MicroHack environment, the PAC file has been already generated and can be downloaded from http://10.57.2.4:8080/O365-optmize.pac. In order to use it, update the PAC settings in Microsoft Edge:
 
+![image](images/o365-proxy-pac.png)
+
+Now try and access your O365 mailbox at https://outlook.office365.com. You will get an access denied message. This is expected: The PAC file causes some connections to go directly to Azure Firewall, which is not yet configured with the proper rules.
+
+The Azure Firewall rules can be generated automatically, by consuming the endpints web service. A Powershell script is provided to do so:
 - go to the "internet-outboud-microhack/scripts/" directory
 
   ` cd`
