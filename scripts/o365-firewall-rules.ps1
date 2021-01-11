@@ -6,7 +6,7 @@ $allowPriority = 1159
 
 $wvdSessionHostPoolSubnet = "10.59.1.0/24"
 
-Write-Host "Retrieving O365 endpointd from web service..."
+Write-Host "Retrieving O365 endpoints from web service..."
 
 $endpoints = invoke-restmethod -Uri ("https://endpoints.office.com/endpoints/WorldWide?NoIPv6=true&clientrequestid=" + ([GUID]::NewGuid()).Guid) 
 $endpoints = $endpoints | ? {$_.category -eq "Optimize" -or $_.category -eq "Allow"}
@@ -22,7 +22,7 @@ $allowApplicationRules = @()
 foreach ($endpoint in $endpoints) {
     if (-not ($endpoint.urls -eq $null)) {
         
-        Write-Host "Creating application rule for $endpoint.serviceAreaDisplayName..."
+        Write-Host "Creating application rule for " $endpoint.serviceAreaDisplayName
         
         $uniqueName = $endpoint.id.ToString() + "_O365_" + $endpoint.category + "_" + $endpoint.serviceAreaDisplayName.Replace(" ", "_")
         
@@ -38,7 +38,7 @@ foreach ($endpoint in $endpoints) {
     }
     
     if (-not($endpoint.ips -eq $null)) {
-        Write-Host "Creating network rule for $endpoint.serviceAreaDisplayName..."
+        Write-Host "Creating network rule for " $endpoint.serviceAreaDisplayName
         $ips = $endpoint | select -Unique -ExpandProperty ips
         $ports = @()
         $protocols = @()
@@ -54,7 +54,6 @@ foreach ($endpoint in $endpoints) {
             $ipGroup = Get-AzIpGroup -Name "ipgroup_$uniqueName" -ResourceGroupName $rg -ErrorAction Stop
         }
         catch {
-            echo "creating IpGroup ipgroup_$uniqueName"
             $ipGroup = New-AzIpGroup -Name "ipgroup_$uniqueName" -ResourceGroupName $rg  -Location $location -IpAddress $ips
         }
     
@@ -81,5 +80,5 @@ $azfw.ApplicationRuleCollections.Add($optimizeApplicationRuleCollection)
 $azfw.ApplicationRuleCollections.Add($allowApplicationRuleCollection)
 $azfw.NetworkRuleCollections.Add($optimizeNetworkRuleCollection)
 $azfw.NetworkRuleCollections.Add($allowNetworkRuleCollection)
-Set-AzFirewall -AzureFirewall $azfw
+$azfw = Set-AzFirewall -AzureFirewall $azfw
 Write-Host "Done!"

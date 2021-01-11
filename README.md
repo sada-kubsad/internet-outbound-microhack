@@ -1,16 +1,23 @@
 # Internet outbound connectivity MicroHack
 
+### [Scenario](#Scenario)
+### [Prerequistes](#Prerequisites)
 
+### [Challenge 1: Forced tunneling](#Challenge 1: Forced tunneling)
+
+### [Challenge 2: Route internet traffic through Azure Firewall](#Challenge 2: Route internet traffic through Azure Firewall)
+
+###[Challenge 3: Add a proxy solution](#Challenge 3: Add a proxy solution)
 
 # Scenario
-Contoso Inc., a financial services company, has recently started a datacenter migration project aimed at moving several LOB applications and a VDI farm to Azure. In its corporate network, Contoso enforces a strict security policy for internet access, both for users and servers. The security team requested that the same policy be applied in the cloud. To address this requirement, the network team configured Azure VNets to route back to the on-prem datacenter all internet-bound connections i (aka "forced tunneling").  Both the security team and Contoso's CTO endorsed the solution. Forced tunneling allows managing internet traffic in Azure in the very same way as in the corporate network. Also, it leverages the significant investments made by Contoso over the last few years in on-premises network security equipment, such as firewalls, proxies, IDS/IPS. 
+Contoso Inc., a financial services company, has recently started a datacenter migration project aimed at moving several LOB applications and a VDI farm to Azure. In its corporate network, Contoso enforces a strict security policy for internet access. The security team requested that the same policy be applied in the cloud. To address this requirement, the network team configured Azure VNets to route back to the on-prem datacenter all internet-bound connections (aka "forced tunneling").  Both the security team and Contoso's CTO endorsed the solution. Forced tunneling allows managing internet traffic in the cloud in the very same way as in the corporate network. Also, it leverages the significant investments made by Contoso over the last few years in on-premises network security equipment, such as firewalls, proxies, IDS/IPS.
 
 Forced tunneling allowed Contoso to migrate the first, simple IaaS workloads (lift&shift). But its limitations became clear as soon as Contoso deployed more advanced Azure services:
 
 - Users reported poor performance when using Windows Virtual Desktop, which was identified as the most cost-effective solution to move VDI workloads to Azure;
 - WVD users generated a high volume of traffic related to internet browsing, which drove cross-premises connectivity costs up;
 - Many VNet-injected PaaS services (such as Databricks and HDInsight that Contoso' s data scientists plan to deploy) could not be deployed in VNets with a forced tunneling routing policy.  
-## Objective
+
 This Microhack walks through the implementation of a secure internet edge in the cloud, based on Azure Firewall, that overcomes the limitations of forced tunneling and enables Contoso to deploy the advanced PaaS services required by the business, while complying with corporate security policies.
 # Prerequisites
 ## Overview
@@ -28,7 +35,7 @@ In summary:
 - All of the above is deployed within a single resource group called *internet-outbound-microhack-rg*.
 
 
-## Task 1 : Deploy Template
+## Task 1 : Deploy Templates
 
 We are going to use a predefined Terraform template to deploy the base environment. It will be deployed in to *your* Azure subscription, with resources running in the specified Azure region.
 
@@ -198,26 +205,86 @@ You have negotiated with the security team a solution that strikes an acceptable
 - Only the "Windows Virtual Desktop" service tag, which corresponds to a small set of Microsoft-controlled endpoints, will be used in the firewall configuration
 - For the other required URLs, application rules matching only the specific URLs will be used.
 
-To implement this policy, go to the "scripts/" directory and execute the wvd-firewall-rules.ps1 script. When done, go to the portal and verify
+To implement this policy, go to the "scripts/" directory and execute the wvd-firewall-rules.ps1 script. When done, go to your Azure Firewall configuration in the portal and verify that you have two rule colletions (one network rule collection, one application rule collection) that allow access to the endpoints listed in the previous figure.
 
 ## :checkered_flag: Results
 
 When the new rules are applied, verify that you can access any site in the microsoft.com domain from the wvd-workstation. Browse to https://ipinfo.io and verify that your public IP address has changed again. In the Azure portal, confirm that your address corresponds to your Azure Firewall instance's public IP.  
 
-# Challenge 3: Make it real
+# Challenge 3: Add a proxy solution
 
-In the previous challenge you implemented a simple internet security policy using Azure Firewall rules. 
+Contoso's security team recognized that the solution implemented in the previous challenge works well for server-generated traffic, such as connections between WVD session hosts and WVD endpoints. Azure Firewall, with its IP- and FQDN-based filtering capabilities,  provides a cost effective solution to secure access to known/trusted endpoints. However, with WVD being rolled out, Contoso raised concerns about its applicability to traffic generated by users browsing the internet from their WVD workstations:    
 
-Contoso's security team recognized that the solution is good enough for server-generated traffic (servers typically have dependencies on small sets of well-known, trusted endpoints), but rejected it for user traffic, on the following grounds:
+- Users tend to access broad sets of URLs, which are best specified by category (news, e-commerce, gambling, ...) instead of black/whitelists of known FQDNs
+- The security team insists on applying TLS inspection at least to connections to low-trust domains, as Contoso's on-prem proxy currently does
+- The security team considers the existing on-prem proxy a fundamental security control, because of its logging, inspection and authentication capabilities. At the same time, they have no budget to deploy a functionally equivalent proxy solution in Azure.
+- The security team is also reluctant to approve direct access via Azure Firewall to the [broad set of URLs required by Office365](https://docs.microsoft.com/en-us/microsoft-365/enterprise/urls-and-ip-address-ranges?view=o365-worldwide). The topic is highly controversial because routing O365 traffic back to on-prem would drive cost for ER and/or VPN connectivity up
 
-- Users tend to access broad sets of URLs, which are best specified by category (news, e-commerce, gambling, etc) instead of black/whitelists
-- Contoso cannot permit direct, non-proxied access to URLs belonging to low-trust domains
-- Contoso may need to authenticate users, at least for access to specific URLs
+The following solution has been identified as the optimal trade-off between the conflicting requirements listed above:
 
-In this challenge, you will extend your secure internet edge solution based on Azure Firewall to incorporate the requirements mentioned above. More specifically, you will implement a selective proxying policy whereby trusted destinations (such as Azure PaaS service and O365 applications) can be reached directly via Azure Firewall, while general internet traffic is sent to Contoso's on-premises security appliances.
+- Server VMs will access the internet directly via Azure Firewall (i.e. the configuration you created in Challenge 2)
+- WVD workstations will use a  selective proxying policy whereby trusted destinations (such as Azure PaaS service and a subset of O365 URLs) will be reached directly via Azure Firewall, while general internet traffic is sent to Contoso's on-premises security appliances.
 
-## Task 1: Enable proxy.pac on wvd-workstation
+The following tasks will walk through the configuration of WVD workstations.
+
+## Task 1: Configure an explicit proxy on wvd-workstation
+
+As the wvd-workstation runs in a subnet whose default gateway is now Azure Firewall (Challenge 2), you cannot rely on transparent proxy interception as you did in Challenge 1. An explicit proxy configuration is now required. Moreover, you need to specify which destinations should be reached directly via Azure Firewall and which ones should be reached via Contoso's on-prem proxy. You can do so by means of a "Proxy Automatic Configuration (PAC)" file. In the Microhack environment, some PAC files are available at  http://10.57.2.4:8080. To configure Microsoft Edge to use a PAC:
+
+- verify that a PAC file is available by browsing to http://10.57.2.4:8080/proxypac-3-1.pac. Note that, on line 7, the script allows direct to "ipinfo.io"
+- go to "Settings" ==> "System" ==> "Open System Proxy Settings"
+- enter "http://10.57.2.4:8080/proxypac-3-1.pac" as the script address
+- click "Save"
+
+![image](images/proxy-pac-setup.png)
+
+- Open a new tab and browse to https://ipinfo.io to see the public IP address you're using to access the internet. Verify that it is  your Azure Firewall's public IP. This confirms that you are reaching https://ipinfo.io directly .
+- Open a new tab and browse to https://whatismyipaddress.com . Verify that it is the public IP assigned to the onprem-proxy-vm. This confirms that you are reaching https://whatismyipaddress.com via Contoso's on-prem proxy.
+
+## Task 2: Optimize O365 connectivity
+
+The selective proxying configuration defined in the previous task can be used to optimize access to Office365, according to the connectivity principles documented [here](https://docs.microsoft.com/en-us/microsoft-365/enterprise/microsoft-365-network-connectivity-principles?view=o365-worldwide#new-office-365-endpoint-categories). In a nutshell, the endpoints and URLs that must be reachable from a workstation to successfully consume O365 applications are divided into three categories:
+
+- **Optimize** endpoints are required for connectivity to  every Office 365 service and represent over 75% of Office 365 bandwidth, connections, and volume of data. These endpoints represent Office 365  scenarios that are the most sensitive to network performance, latency,  and availability. All endpoints are hosted in Microsoft datacenters. The rate of change to the endpoints in this category is expected to be much lower than for the endpoints in the other two categories.
+- **Allow** endpoints are required for connectivity to  specific Office 365 services and features, but are not as sensitive to  network performance and latency as those in the *Optimize*  category. The overall network footprint of these endpoints from the  standpoint of bandwidth and connection count is also smaller. These  endpoints are dedicated to Office 365 and are hosted in Microsoft  datacenters.
+- **Default** endpoints represent Office 365 services and  dependencies that do not require any optimization, and can be treated by customer networks as normal Internet bound traffic. Some endpoints in  this category may not be hosted in Microsoft datacenters.
+
+As the "Optimize" and "Allow" endpoints are hosted in Microsoft datacenters, Contoso's security team has accepted to allow direct access to them via Azure Firewall. They requested that the on-prem proxy is used only for traffic to the default endpoints. 
+
+To implement this policy, you are going to need:
+
+- a PAC file to bypass the proxy for connections to "Optimize" and "Allow" endpoints
+- Azure Firewall rules to allow connections to "Optimize" and "Allow" endpoint
+
+Contoso's on-prem proxy already allows access to "Default" endpoints because it is currently used to consume those endpoints from the corpotate network. 
+
+An [Office 365 IP Address and URL web service](https://docs.microsoft.com/en-us/microsoft-365/enterprise/microsoft-365-ip-web-service?view=o365-worldwide) allows downloading an up-to-date list of all endpoints (URLs, IP addresses, category, ect). Therefore, both the proxy PAC file and the firewall rules can be automatically generated (and refreshed on a regular basis). In the MicroHack environment, the PAC file has been already generated and can be downloaded from http://10.57.2.4:8080/O365-optmize.pac. You are going to generate the Azure Firewall rules using the same approach:
+
+- go to the "internet-outboud-microhack/scripts/" directory
+
+  ` cd`
+
+  `cd internet-outbound/scripts`
+
+- run the Powershell script "o365-firewall-rules.ps1"
+
+  `./o365-firewall-rules.ps1 -AzFwName <your Azure Firewall name>`
+
+- When the script completes, go to the Azure portal and verify that network and application rule collections have been created for "Optimize" and "Allow" endpoints 
+
+- Verify that you can successfully log into your O365 mailbox at https://outlook.office365.com.
+## :checkered_flag: Results
+
+You have built a network configuration that does not rely on forced tunneling and allows Contoso to leverage Azure Firewall to access Azure PaaS services and O365 applications with minimal latency. At the same time, you addressed the security team's requirement to use an existing on-prem proxy solution to secure generic internet access from WVD workstations.
+
+# Finished? Delete your lab
+
+- Delete the resource group internet-outbound-microhack-rg
+
+Thank you for participating in this MicroHack!
+
+  
 
 
 
-# Challenge 4: Deploy Databricks
+
