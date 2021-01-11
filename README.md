@@ -3,11 +3,11 @@
 ### [Scenario](#Scenario)
 ### [Prerequistes](#Prerequisites)
 
-### [Challenge 1: Forced tunneling]('#Challenge 1: Forced tunneling')
+### [Challenge 1: Forced tunneling](#Challenge-1-forced-tunneling)
 
-### [Challenge 2: Route internet traffic through Azure Firewall](#Challenge 2: Route internet traffic through Azure Firewall)
+### [Challenge 2: Route internet traffic through Azure Firewall](#Challenge-2-route-internet-traffic-through-azure-firewall)
 
-###[Challenge 3: Add a proxy solution](#Challenge 3: Add a proxy solution)
+###[Challenge 3: Add a proxy solution](#Challenge-3-add-a-proxy-solution)
 
 # Scenario
 Contoso Inc., a financial services company, has recently started a datacenter migration project aimed at moving several LOB applications and a VDI farm to Azure. In its corporate network, Contoso enforces a strict security policy for internet access. The security team requested that the same policy be applied in the cloud. To address this requirement, the network team configured Azure VNets to route back to the on-prem datacenter all internet-bound connections (aka "forced tunneling").  Both the security team and Contoso's CTO endorsed the solution. Forced tunneling allows managing internet traffic in the cloud in the very same way as in the corporate network. Also, it leverages the significant investments made by Contoso over the last few years in on-premises network security equipment, such as firewalls, proxies, IDS/IPS.
