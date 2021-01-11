@@ -281,6 +281,7 @@ The Azure Firewall rules can be generated automatically, by consuming the endpin
 ## :checkered_flag: Results
 
 You have built a network configuration that does not rely on forced tunneling and allows Contoso to leverage Azure Firewall to access Azure PaaS services and O365 applications with minimal latency. At the same time, you addressed the security team's requirement to use an existing on-prem proxy solution to secure generic internet access from WVD workstations.
+![image](images/o365-traffic.png)
 
 # Finished? Delete your lab
 
