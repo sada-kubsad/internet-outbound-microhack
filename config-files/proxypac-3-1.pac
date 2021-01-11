@@ -16,7 +16,8 @@ function FindProxyForURL(url, host)
        || shExpMatch(host, "mrsglobalsteus2prod.blob.core.windows.net")
        || shExpMatch(host, "wvdportalstorageblob.blob.core.windows.net")
        || shExpMatch(host, "169.254.169.254")
-       || shExpMatch(host, "168.63.129.16"))
+       || shExpMatch(host, "168.63.129.16")
+       || shExpMatch(host, "10.57.2.4"))
     {
         return direct;
     }
