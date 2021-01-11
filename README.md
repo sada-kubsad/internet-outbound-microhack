@@ -151,13 +151,13 @@ You have now a forced tunnel configuration in place.
 
 In this challenge you will explore how Contoso can address the performance problem reported by WVD users. You will build a secure edge in Azure, thus removing the need to route all internet-bound connections to Contoso's on-prem datacenter (red line). Routing WVD traffic directly to the internet via Azure Firewall reduces latency and improves user experience (green line).
 
-![image](images\forced-vs-direct.png)
+![image](images/forced-vs-direct.png)
 
 ## Task 1: Deploy Azure Firewall
 
 In the Azure Portal, deploy a new Azure Firewall instance in the hub-vnet. A subnet named "AzureFirewallSubnet" has been already created for you. 
 
-![image](images\firewall.png)
+![image](images/firewall.png)
 
 When the deployment completes, go to the new firewall's overview tile a take note of its *private* IP address. This IP address will become the default gateway for Contoso's Azure VNets. 
 
@@ -184,7 +184,7 @@ Configure Azure Firewall to implement the same internet access policy as Contoso
 
 In the Azure Portal, create a new application rule collection for Azure Firewall as shown in the screenshot below.
 
-![image](images\manual-azfw-policy.png)
+![image](images/manual-azfw-policy.png)
 
 Confirm that you can now access https://ipinfo.io and https://docs.microsoft.com. verify that your public IP address is now the public IP address of your Azure Firewall.
 
