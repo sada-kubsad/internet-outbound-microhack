@@ -37,5 +37,5 @@ $azfw = Get-AzFirewall -Name $azFwName -ResourceGroupName $rg
 $azfw.ApplicationRuleCollections.Add($wvdApplicationRuleCollection)
 $azfw.NetworkRuleCollections.Add($wvdNetworkRuleCollection)
 Write-Host "Updating firewall..."
-Set-AzFirewall -AzureFirewall $azfw
+$azfw = Set-AzFirewall -AzureFirewall $azfw
 Write-Host "Done!"
