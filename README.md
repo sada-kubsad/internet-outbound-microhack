@@ -52,8 +52,8 @@ To start the Terraform deployment, follow the steps listed below:
 
 - Go to the new folder "internet-outbound-microhack/templates" and initialize the terraform modules and download the azurerm resource provider
 
-`cd internet-outbound-microhack/templates
-terraform init`
+`cd internet-outbound-microhack/templates`
+`terraform init`
 
 - Now run apply to start the deployment 
 
