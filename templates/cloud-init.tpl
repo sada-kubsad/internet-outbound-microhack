@@ -40,7 +40,7 @@ write_files:
 runcmd:
   - curl https://raw.githubusercontent.com/fguerri/internet-outbound-microhack/main/config-files/httpd.conf --output /etc/httpd/conf/httpd.conf
   - curl https://raw.githubusercontent.com/fguerri/internet-outbound-microhack/main/config-files/O365-optimize.pac --output /var/www/html/O365-optimize.pac
-  - curl https://https://raw.githubusercontent.com/fguerri/internet-outbound-microhack/main/config-files/proxypac-3-1.pac --output /var/www/html/proxypac-3-1.pac
+  - curl https://raw.githubusercontent.com/fguerri/internet-outbound-microhack/main/config-files/proxypac-3-1.pac --output /var/www/html/proxypac-3-1.pac
   - systemctl enable --now httpd
   - curl https://raw.githubusercontent.com/fguerri/internet-outbound-microhack/main/config-files/squid.conf --output /etc/squid/squid.conf
   - curl https://raw.githubusercontent.com/fguerri/internet-outbound-microhack/main/config-files/contoso-urls.conf --output /etc/squid/contoso-urls.conf
