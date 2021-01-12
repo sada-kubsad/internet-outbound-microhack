@@ -84,7 +84,9 @@ Now that we have the base lab deployed, we can progress to the MicroHack challen
 In this challenge, you will configure forced tunneling in Contoso's Azure VNets, as initially suggested by the network team.  
 
 ## Task 1: Configure default route in wvd-spoke
-Your Microhack environment has been deployed with a default routing configuration whereby Azure VMs have direct access to the internet. Log onto the wvd-workstation, open Microsoft Edge and verify that you can browse the internet without restrictions. Before modifying the existing configuration, point your browser to https://ipinfo.io and take note of the public IP address it returns. Confirm that it is the public IP address assigend to your VM. In the Azure portal, search "wvd-workstation" and find the public IP addressin the "Overview" section 
+Your Microhack environment has been deployed with a default routing configuration whereby Azure VMs have direct access to the internet. Log onto the wvd-workstation, open Microsoft Edge and verify that you can browse the internet without restrictions. Before modifying the existing configuration, point your browser to https://ipinfo.io and take note of the public IP address it returns. Confirm that it is the public IP address assigned to your VM. In the Azure portal, search "wvd-workstation" and find the public IP address in the "Overview" section:
+
+![image](images/wvd-workstation-pip.png)
 
 In the Azure portal, find the Route Table "wvd-spoke-rt" associated to the wvd-workstation's subnet and add a default route to send all internet-bound traffic to on-prem, via the site-2-site IPSec tunnel:
 
