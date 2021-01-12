@@ -131,8 +131,8 @@ As a Contoso employee, you are willing to trust Contoso's Enterprise CA, which y
 
 > In real-world scenarios, certificates can be automatically distributed to workstations using configuration management tools (for example, certificates can be distribute to domain-joined computers by means of Windows Server AD GPOs). 
 
-- Browse to https://ipinfo.io again. Now you can successfully the site
-- Verify hat the public IP you're using to access the internet is actually the proxy's public IP
+- In Microsoft Edge, click the reload button and verify that you can now access https://ipinfo.io
+- Verify that the public IP you're using to access the internet is now the proxy's public IP
 
 ![image](images/confirm-public-ip.png)
 
