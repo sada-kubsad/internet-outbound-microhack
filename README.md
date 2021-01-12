@@ -78,7 +78,7 @@ To start the Terraform deployment, follow the steps listed below:
 - You are now be able to login to all VMs using your specified credentials
 - End-to-end network connectivity has been verified from On-Premises to Azure
 
-Now that we have the base lab deployed, we can progress to the Private Link challenges!
+Now that we have the base lab deployed, we can progress to the MicroHack challenges!
 # Challenge 1: Forced tunneling
 
 In this challenge, you will configure forced tunneling in Contoso's Azure VNets, as initially suggested by the network team.  
@@ -93,7 +93,9 @@ In the Azure portal, find the Route Table "wvd-spoke-rt" associated to the wvd-w
 In Azure Cloud Shell, configure the VPN Gateway with a default route to send all internet-bound traffic to on-prem:
 
 `$lgw = Get-AzLocalNetworkGateway -Name onprem-lng -ResourceGroupName internet-outbound-microhack-rg`
+
 `$gw = Get-AzVirtualNetworkGateway -Name hub-vpngw -ResourceGroupName internet-outbound-microhack-rg`
+
 `Set-A zVirtualNetworkGatewayDefaultSite -VirtualNetworkGateway $gw -GatewayDefaultSite $lgw`
 
 > Please note that setting the VPN gateway default site is only required for statically routed tunnels (i.e. when BGP is not used). Similarly, no default site setting is needed when using Expressroute instead of site-to-site VPN.
@@ -112,7 +114,7 @@ The on-prem proxy performs TLS inspection by terminating on itself the TLS conne
 
 As a Contoso employee, you are willing to trust Contoso's Enterprise CA, which you can do by installing it in your certificate store. 
 
-- Select the "on-prem-proxy-vm" certificate as shown in the previous figure
+- Select the "Contoso Enterprise CA" certificate as shown in the previous figure
 - Click on "View certificate"
 - Click on "Details"
 - Click on "Copy to file...", accept all defaults suggested by the wizard and save the certificate on your desktop
@@ -171,6 +173,7 @@ In the Azure portal, go to the Route Table "wvd-spoke-rt" and modify the next ho
 Remove the default route configuration from the VPN gateway (configured in Challenge 1):
 
 `$gw= Get-AzVirtualNetworkGateway -Name hub-vpngw -ResourceGroupName internet-outbound-microhack-rg`
+
 `Remove-AzVirtualNetworkGatewayDefaultSite -VirtualNetworkGateway $gw -GatewayDefaultSite $lgw`
 
 Verify that you no longer have connectivity to the internet from the wvd-workstation. Connections are now being routed to Azure Firewall, which is running with the default "deny all" policy.
@@ -187,7 +190,7 @@ In the Azure Portal, create a new application rule collection for Azure Firewall
 
 ![image](images/manual-azfw-policy.png)
 
-Confirm that you can now access https://ipinfo.io and https://docs.microsoft.com. verify that your public IP address is now the public IP address of your Azure Firewall.
+Confirm that you can now access https://ipinfo.io and https://docs.microsoft.com. Verify that your public IP address is now the public IP address of your Azure Firewall.
 
 ![image](images/azfw-public-ip.png)
 
@@ -206,7 +209,15 @@ You have negotiated with the security team a solution that strikes an acceptable
 - Only the "Windows Virtual Desktop" service tag, which corresponds to a small set of Microsoft-controlled endpoints, will be used in the firewall configuration
 - For the other required URLs, application rules matching only the specific URLs will be used.
 
-To implement this policy, go to the "scripts/" directory and execute the wvd-firewall-rules.ps1 script. When done, go to your Azure Firewall configuration in the portal and verify that you have two rule colletions (one network rule collection, one application rule collection) that allow access to the endpoints listed in the previous figure.
+To implement this policy, go to the "scripts/" directory and execute the wvd-firewall-rules.ps1 script. 
+
+  ` cd`
+
+  `cd internet-outbound/scripts`
+
+  `./wvd-firewall-rules.ps1 -AzFwName <your Azure Firewall name>`
+  
+When done, go to your Azure Firewall configuration in the portal and verify that you have two rule colletions (one network rule collection, one application rule collection) that allow access to the endpoints listed in the previous figure.
 
 ## :checkered_flag: Results
 
