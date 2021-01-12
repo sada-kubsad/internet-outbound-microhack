@@ -75,7 +75,7 @@ $optimizeNetworkRuleCollection = New-AzFirewallNetworkRuleCollection -Name O365-
 $allowNetworkRuleCollection = New-AzFirewallNetworkRuleCollection -Name O365-Allow -Priority $allowPriority -ActionType Allow -Rule $allowNetworkRules
 
 Write-Host "Setting firewall config..."
-$azfw = Get-AzFirewall -Name $azfwName -ResourceGroupName $rg
+$azfw = Get-AzFirewall -Name $azFwName -ResourceGroupName $rg
 $azfw.ApplicationRuleCollections.Add($optimizeApplicationRuleCollection)
 $azfw.ApplicationRuleCollections.Add($allowApplicationRuleCollection)
 $azfw.NetworkRuleCollections.Add($optimizeNetworkRuleCollection)
