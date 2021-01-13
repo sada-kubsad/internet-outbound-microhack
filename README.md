@@ -255,6 +255,8 @@ As the wvd-workstation runs in a subnet whose default gateway is now Azure Firew
 - Open a new tab and browse to https://ipinfo.io to see the public IP address you're using to access the internet. Verify that it is  your Azure Firewall's public IP. This confirms that you are reaching https://ipinfo.io directly .
 - Open a new tab and browse to https://whatismyipaddress.com . Verify that it is the public IP assigned to the onprem-proxy-vm. This confirms that you are reaching https://whatismyipaddress.com via Contoso's on-prem proxy.
 
+![image](images/internet-access-via-proxy.png)
+
 ## Task 2: Optimize O365 connectivity
 
 The selective proxying configuration defined in the previous task can be used to optimize access to Office365, according to the connectivity principles documented [here](https://docs.microsoft.com/en-us/microsoft-365/enterprise/microsoft-365-network-connectivity-principles?view=o365-worldwide#new-office-365-endpoint-categories). In a nutshell, the endpoints and URLs that must be reachable from a workstation to successfully consume O365 applications are divided into three categories:
