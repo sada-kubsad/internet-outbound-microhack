@@ -1,4 +1,4 @@
-# Internet outbound connectivity MicroHack
+# Handling internet access in Azure, for effective WVD and Azure PaaS designs - MicroHack
 
 ### [Scenario](#scenario)
 ### [Prerequistes](#prerequisites)
