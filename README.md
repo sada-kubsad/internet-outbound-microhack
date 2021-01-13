@@ -10,13 +10,13 @@
 ### [Challenge 3: Add a proxy solution](#challenge-3-add-a-proxy-solution-1)
 
 # Scenario
-Contoso Inc., a financial services company, has recently started a datacenter migration project aimed at moving several LOB applications and a VDI farm to Azure. In its corporate network, Contoso enforces a strict security policy for internet access. The security team requested that the same policy be applied in the cloud. To address this requirement, the network team configured Azure VNets to route back to the on-prem datacenter all internet-bound connections (aka "forced tunneling").  Both the security team and Contoso's CTO endorsed the solution. Forced tunneling allows managing internet traffic in the cloud in the very same way as in the corporate network. Also, it leverages the significant investments made by Contoso over the last few years in on-premises network security equipment, such as firewalls, proxies, IDS/IPS.
+Contoso Inc., a financial services company, has recently started a datacenter migration project aimed at moving several LOB applications and a VDI farm to Azure. In its corporate network, Contoso enforces a strict security policy for internet access. The security team requested that the same policy be applied in the cloud. To address this requirement, the network team configured Azure VNets to route back to the on-prem datacenter all internet-bound connections (aka "[forced tunneling](https://docs.microsoft.com/en-us/azure/vpn-gateway/vpn-gateway-forced-tunneling-rm)").  Both the security team and Contoso's CTO endorsed the solution. Forced tunneling allows managing internet traffic in the cloud in the very same way as in the corporate network. Also, it leverages the significant investments made by Contoso over the last few years in on-premises network security equipment, such as firewalls, proxies, IDS/IPS.
 
 Forced tunneling allowed Contoso to migrate the first, simple IaaS workloads (lift&shift). But its limitations became clear as soon as Contoso deployed more advanced Azure services:
 
 - Users reported poor performance when using Windows Virtual Desktop, which was identified as the most cost-effective solution to move VDI workloads to Azure;
 - WVD users generated a high volume of traffic related to internet browsing, which drove hybrid connectivity costs up;
-- Many VNet-injected PaaS services (such as Databricks and HDInsight that Contoso' s data scientists plan to deploy) could not be deployed in VNets with a forced tunneling routing policy.  
+- Many VNet-injected PaaS services (such as [Databricks](https://docs.microsoft.com/en-us/azure/databricks/administration-guide/cloud-configurations/azure/on-prem-network) and [HDInsight](https://docs.microsoft.com/en-us/azure/hdinsight/control-network-traffic#forced-tunneling-to-on-premises) that Contoso' s data scientists plan to deploy) have internet access requirements that are difficult to address with forced tunneling.  
 
 This Microhack walks through the implementation of a secure internet edge in the cloud, based on Azure Firewall, that overcomes the limitations of forced tunneling and enables Contoso to deploy the advanced PaaS services required by the business, while complying with corporate security policies.
 # Prerequisites
@@ -100,7 +100,7 @@ In Azure Cloud Shell, configure the VPN Gateway with a default route to send all
 
 `Set-AzVirtualNetworkGatewayDefaultSite -VirtualNetworkGateway $gw -GatewayDefaultSite $lgw`
 
-> Please note that setting the VPN gateway default site is only required for statically routed tunnels (i.e. when BGP is not used). Similarly, no default site setting is needed when using Expressroute instead of site-to-site VPN.
+> Please note that setting the VPN gateway default site is only required for statically routed tunnels (i.e. when BGP is not used). Similarly, no default site setting is needed when using Expressroute instead of site-to-site VPN. More details are available [here](https://docs.microsoft.com/en-us/azure/vpn-gateway/vpn-gateway-forced-tunneling-rm#configure-forced-tunneling-1).
 
 Verify that internet access from the wvd-workstation is now controlled by Contoso's on-prem proxy. Browse again to https://ipinfo.io. The error message that you see is due to the TLS inspection performed by the proxy. 
 
